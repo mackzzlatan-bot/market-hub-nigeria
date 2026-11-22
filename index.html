@@ -1,0 +1,752 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>MarketHub Nigeria | Shop, Sell & Grow</title>
+<style>
+:root {
+  --dark:#101827;
+  --green:#087f5b;
+  --green2:#0b9b6c;
+  --bg:#f3f6f5;
+  --white:#fff;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --red:#b91c1c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--dark)}
+header{background:var(--dark);color:white;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:23px;font-weight:800}
+.brand span{color:#4ade80}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{background:transparent;color:white;border:0;padding:9px;cursor:pointer;border-radius:7px}
+nav button:hover{background:#29364b}
+.hero{padding:55px 6%;background:linear-gradient(120deg,#064e3b,#087f5b);color:white}
+.hero h1{font-size:clamp(30px,5vw,48px);margin:0 0 12px}
+.hero p{max-width:620px;line-height:1.7}
+.container{max-width:1150px;margin:auto;padding:25px 5%}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+.panel,.product,.stat{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel{padding:20px;margin-bottom:18px}
+.product img{width:100%;height:175px;object-fit:cover;background:#e5e7eb}
+.product-content{padding:15px}
+.product h3{margin:5px 0}
+.price{font-size:19px;font-weight:800;color:var(--green)}
+.muted{font-size:13px;color:var(--muted)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font:inherit;background:white}
+.tools input{flex:1;min-width:180px}
+.tools select{width:auto;min-width:150px}
+.field{margin-bottom:13px}
+.field label{display:block;font-weight:700;margin-bottom:6px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+button.primary,button.secondary,button.danger{border:0;padding:11px 15px;border-radius:8px;cursor:pointer;font-weight:700}
+button.primary{background:var(--green);color:white}
+button.primary:hover{background:var(--green2)}
+button.secondary{background:#e2e8f0;color:var(--dark)}
+button.danger{background:#fee2e2;color:var(--red)}
+.product button{width:100%;margin-top:12px}
+.notice{background:#ecfdf5;border:1px solid #a7f3d0;padding:14px;border-radius:9px;line-height:1.6;margin:12px 0}
+.warning{background:#fff7ed;border:1px solid #fed7aa;padding:13px;border-radius:8px;line-height:1.5;margin:12px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.row:last-child{border-bottom:0}
+.stat{padding:18px}
+.stat strong{display:block;font-size:24px;color:var(--green);margin-top:8px}
+.badge{display:inline-block;padding:5px 8px;border-radius:20px;background:#e2e8f0;font-size:12px}
+footer{background:var(--dark);color:white;text-align:center;padding:25px;margin-top:40px}
+.small{padding:7px 10px!important}
+@media(max-width:600px){
+ header{flex-direction:column;align-items:flex-start}
+ nav{width:100%}
+ nav button{padding:8px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Market<span>Hub</span> Nigeria</div>
+  <nav>
+    <button onclick="showPage('shop')">Shop</button>
+    <button onclick="showPage('cart')">Cart (<span id="cartCount">0</span>)</button>
+    <button onclick="showPage('orders')">Orders</button>
+    <button onclick="showPage('sell')">Sell</button>
+    <button onclick="showPage('earnings')">Earnings</button>
+    <button onclick="showPage('admin')">Admin</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Shop. Sell. Grow.</h1>
+  <p>
+    Discover cosmetics and grocery products, shop online,
+    submit products for sale and build a real business through
+    genuine completed sales.
+  </p>
+  <button class="primary" onclick="showPage('shop')">Start Shopping</button>
+</section>
+
+<main class="container">
+
+<!-- SHOP -->
+<section id="shopPage">
+  <h2>Explore Products</h2>
+  <div class="tools">
+    <input id="search" placeholder="Search products..." oninput="renderProducts()">
+    <select id="category" onchange="renderProducts()">
+      <option value="all">All categories</option>
+      <option value="Cosmetics">Cosmetics</option>
+      <option value="Groceries">Groceries</option>
+    </select>
+  </div>
+  <div id="products" class="grid"></div>
+</section>
+
+<!-- CART -->
+<section id="cartPage" class="hidden">
+  <h2>Your Shopping Cart</h2>
+  <div class="panel">
+    <div id="cartItems"></div>
+    <h3 id="cartTotal">Total: ₦0</h3>
+    <button class="primary" onclick="showPage('checkout')">Continue to Checkout</button>
+  </div>
+</section>
+
+<!-- CHECKOUT -->
+<section id="checkoutPage" class="hidden">
+  <h2>Customer Checkout</h2>
+  <div class="panel">
+    <form onsubmit="placeOrder(event)">
+      <div class="form-grid">
+        <div class="field">
+          <label>Full name</label>
+          <input id="buyerName" required>
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <input id="buyerPhone" type="tel" required>
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input id="buyerEmail" type="email" required>
+        </div>
+        <div class="field">
+          <label>Delivery address</label>
+          <input id="buyerAddress" required>
+        </div>
+      </div>
+      <h3 id="checkoutTotal"></h3>
+      <button class="primary" type="submit">Place Order</button>
+    </form>
+  </div>
+</section>
+
+<!-- PAYMENT -->
+<section id="paymentPage" class="hidden">
+  <h2>Direct Bank Transfer</h2>
+  <div class="panel">
+    <div class="notice">
+      <strong>Your order has been created.</strong>
+      <p>Order reference: <strong id="paymentReference"></strong></p>
+      <p>Amount to pay: <strong id="paymentAmount"></strong></p>
+    </div>
+    <h3>Payment instructions</h3>
+    <p>Payment method: PalmPay bank transfer</p>
+    <p><strong>Account number:</strong> Contact the store administrator for the verified payment account details.</p>
+    <p><strong>Account name:</strong> Your banking app may display the beneficiary name before you confirm a transfer.</p>
+    <div class="warning">
+      Your order remains pending until the administrator independently
+      confirms that the money has arrived. A payment screenshot alone
+      does not confirm payment.
+    </div>
+    <button class="primary" onclick="showPage('orders')">View My Orders</button>
+  </div>
+</section>
+
+<!-- ORDERS -->
+<section id="ordersPage" class="hidden">
+  <h2>Order History</h2>
+  <div class="panel">
+    <div id="ordersList"></div>
+  </div>
+</section>
+
+<!-- SELL -->
+<section id="sellPage" class="hidden">
+  <h2>Become a Seller</h2>
+  <div class="panel">
+    <p>Submit products for review. Approved products can be listed in the marketplace.</p>
+    <form onsubmit="submitProduct(event)">
+      <div class="form-grid">
+        <div class="field">
+          <label>Product name</label>
+          <input id="sellerProduct" required>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="sellerCategory">
+            <option>Cosmetics</option>
+            <option>Groceries</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Your product cost (₦)</label>
+          <input id="sellerCost" type="number" min="0" required>
+        </div>
+        <div class="field">
+          <label>Your proposed selling price (₦)</label>
+          <input id="sellerPrice" type="number" min="1" required>
+        </div>
+        <div class="field">
+          <label>Your phone number</label>
+          <input id="sellerPhone" type="tel" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Product description</label>
+        <textarea id="sellerDescription" rows="3" required></textarea>
+      </div>
+      <button class="primary" type="submit">Submit Product</button>
+    </form>
+    <p id="sellerMessage" class="muted"></p>
+  </div>
+</section>
+
+<!-- EARNINGS -->
+<section id="earningsPage" class="hidden">
+  <h2>Sales & Earnings</h2>
+  <div class="warning">
+    Earnings are not investment returns. Only genuine completed sales
+    should count. This demo calculates seller margins from product
+    costs and selling prices; actual earnings must be verified against
+    real orders, fees, refunds and delivery costs.
+  </div>
+  <div class="grid">
+    <div class="stat">
+      <span class="muted">Completed sales</span>
+      <strong id="completedSales">₦0</strong>
+    </div>
+    <div class="stat">
+      <span class="muted">Estimated gross profit</span>
+      <strong id="grossProfit">₦0</strong>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:18px">
+    <h3>How earnings are calculated</h3>
+    <p>Gross profit = actual completed sale amount − product cost.</p>
+    <p>Net profit must also subtract delivery, platform fees, refunds and other business expenses.</p>
+  </div>
+</section>
+
+<!-- ADMIN -->
+<section id="adminPage" class="hidden">
+  <h2>Administrator Dashboard</h2>
+  <div class="warning">
+    <strong>Important security warning:</strong> This is a demonstration
+    dashboard and has no secure login. Anyone who visits this page can
+    access its controls. Do not use it for real customer records or
+    payment management until private administrator authentication and
+    a secure database are added.
+  </div>
+
+  <div class="panel">
+    <h3>Manage Orders</h3>
+    <div id="adminOrders"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Seller Submissions</h3>
+    <div id="sellerSubmissions"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Add a Store Product</h3>
+    <form onsubmit="addAdminProduct(event)">
+      <div class="form-grid">
+        <div class="field">
+          <label>Product name</label>
+          <input id="adminProductName" required>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="adminProductCategory">
+            <option>Cosmetics</option>
+            <option>Groceries</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Selling price (₦)</label>
+          <input id="adminProductPrice" type="number" min="1" required>
+        </div>
+        <div class="field">
+          <label>Image URL</label>
+          <input id="adminProductImage" placeholder="https://..." type="url">
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="adminProductDescription" required></textarea>
+      </div>
+      <button class="primary" type="submit">Add Product</button>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <strong>MarketHub Nigeria</strong>
+  <p>Shop and sell cosmetics and groceries.</p>
+  <p class="muted">Online marketplace starter website.</p>
+</footer>
+
+<script>
+/*
+  MARKETPLACE DEMO SETTINGS
+
+  This website uses browser storage for demonstration.
+  It is NOT a secure shared database.
+
+  Do not place private payment credentials or passwords here.
+*/
+
+const DEFAULT_PRODUCTS = [
+  {
+    id:1,
+    name:"Body Lotion",
+    category:"Cosmetics",
+    price:6500,
+    cost:4000,
+    description:"Everyday skincare body lotion.",
+    image:"https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600"
+  },
+  {
+    id:2,
+    name:"Face Care Set",
+    category:"Cosmetics",
+    price:12000,
+    cost:8000,
+    description:"A simple daily face care set.",
+    image:"https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?w=600"
+  },
+  {
+    id:3,
+    name:"Cooking Oil",
+    category:"Groceries",
+    price:8500,
+    cost:6500,
+    description:"Cooking oil for everyday meals.",
+    image:"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600"
+  },
+  {
+    id:4,
+    name:"Rice",
+    category:"Groceries",
+    price:18000,
+    cost:15000,
+    description:"Quality rice for your kitchen.",
+    image:"https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600"
+  },
+  {
+    id:5,
+    name:"Perfume",
+    category:"Cosmetics",
+    price:9500,
+    cost:6000,
+    description:"Fragrance for everyday use.",
+    image:"https://images.unsplash.com/photo-1541643600914-78b084683601?w=600"
+  },
+  {
+    id:6,
+    name:"Breakfast Cereal",
+    category:"Groceries",
+    price:5500,
+    cost:4000,
+    description:"A convenient breakfast option.",
+    image:"https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?w=600"
+  }
+];
+
+function load(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch(error) {
+    return fallback;
+  }
+}
+
+function save(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+let products = load("mh_products", DEFAULT_PRODUCTS);
+let cart = load("mh_cart", []);
+let orders = load("mh_orders", []);
+let submissions = load("mh_submissions", []);
+
+const money = amount =>
+  "₦" + Number(amount || 0).toLocaleString("en-NG");
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  })[char]);
+}
+
+function showPage(name) {
+  document.querySelectorAll("main section").forEach(section => {
+    section.classList.add("hidden");
+  });
+
+  document.getElementById(name + "Page").classList.remove("hidden");
+
+  if(name==="shop") renderProducts();
+  if(name==="cart") renderCart();
+  if(name==="checkout") renderCheckout();
+  if(name==="orders") renderOrders();
+  if(name==="admin") renderAdmin();
+  if(name==="earnings") renderEarnings();
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderProducts() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const category = document.getElementById("category").value;
+
+  const filtered = products.filter(product =>
+    product.name.toLowerCase().includes(search) &&
+    (category==="all" || product.category===category)
+  );
+
+  document.getElementById("products").innerHTML =
+    filtered.length ? filtered.map(product => `
+      <article class="product">
+        <img src="${escapeHTML(product.image || "https://placehold.co/600x400?text=Product")}"
+          alt="${escapeHTML(product.name)}"
+          onerror="this.src='https://placehold.co/600x400?text=Product'">
+        <div class="product-content">
+          <p class="muted">${escapeHTML(product.category)}</p>
+          <h3>${escapeHTML(product.name)}</h3>
+          <p>${escapeHTML(product.description)}</p>
+          <div class="price">${money(product.price)}</div>
+          <button class="primary" onclick="addToCart(${Number(product.id)})">
+            Add to Cart
+          </button>
+        </div>
+      </article>
+    `).join("") : "<p>No products found.</p>";
+}
+
+function addToCart(id) {
+  const product = products.find(item => item.id===id);
+  if(!product) return;
+
+  const existing = cart.find(item => item.id===id);
+
+  if(existing) existing.quantity++;
+  else cart.push({...product,quantity:1});
+
+  save("mh_cart",cart);
+  updateCartCount();
+  alert("Product added to your cart.");
+}
+
+function cartTotal() {
+  return cart.reduce((total,item) =>
+    total + item.price * item.quantity,0);
+}
+
+function updateCartCount() {
+  document.getElementById("cartCount").textContent =
+    cart.reduce((sum,item)=>sum+item.quantity,0);
+}
+
+function renderCart() {
+  const box = document.getElementById("cartItems");
+
+  box.innerHTML = cart.length ? cart.map(item => `
+    <div class="row">
+      <div>
+        <strong>${escapeHTML(item.name)}</strong><br>
+        ${money(item.price)} × ${item.quantity}
+      </div>
+      <div>
+        <button class="secondary small"
+          onclick="changeQuantity(${item.id},-1)">−</button>
+        <button class="secondary small"
+          onclick="changeQuantity(${item.id},1)">+</button>
+        <button class="danger small"
+          onclick="removeItem(${item.id})">Remove</button>
+      </div>
+    </div>
+  `).join("") : "<p>Your cart is empty.</p>";
+
+  document.getElementById("cartTotal").textContent =
+    "Total: " + money(cartTotal());
+}
+
+function changeQuantity(id,change) {
+  const item = cart.find(product=>product.id===id);
+  if(!item) return;
+
+  item.quantity += change;
+
+  if(item.quantity<=0) removeItem(id);
+  else {
+    save("mh_cart",cart);
+    renderCart();
+    updateCartCount();
+  }
+}
+
+function removeItem(id) {
+  cart = cart.filter(item=>item.id!==id);
+  save("mh_cart",cart);
+  renderCart();
+  updateCartCount();
+}
+
+function renderCheckout() {
+  document.getElementById("checkoutTotal").textContent =
+    "Order total: " + money(cartTotal());
+}
+
+function placeOrder(event) {
+  event.preventDefault();
+
+  if(!cart.length) {
+    alert("Your cart is empty.");
+    showPage("shop");
+    return;
+  }
+
+  const reference = "MH-" + Date.now();
+
+  const order = {
+    reference,
+    name:document.getElementById("buyerName").value.trim(),
+    phone:document.getElementById("buyerPhone").value.trim(),
+    email:document.getElementById("buyerEmail").value.trim(),
+    address:document.getElementById("buyerAddress").value.trim(),
+    items:cart.map(item=>({...item})),
+    total:cartTotal(),
+    status:"Pending payment",
+    date:new Date().toLocaleString()
+  };
+
+  orders.unshift(order);
+  save("mh_orders",orders);
+
+  cart=[];
+  save("mh_cart",cart);
+  updateCartCount();
+
+  document.getElementById("paymentReference").textContent=reference;
+  document.getElementById("paymentAmount").textContent=money(order.total);
+
+  showPage("payment");
+}
+
+function renderOrders() {
+  const box=document.getElementById("ordersList");
+
+  box.innerHTML=orders.length ? orders.map(order=>`
+    <div class="row">
+      <div>
+        <strong>${escapeHTML(order.reference)}</strong><br>
+        ${escapeHTML(order.date)}<br>
+        ${money(order.total)}<br>
+        <span class="badge">${escapeHTML(order.status)}</span>
+      </div>
+      <div>
+        ${order.items.map(item =>
+          escapeHTML(item.name)+" × "+item.quantity
+        ).join("<br>")}
+      </div>
+    </div>
+  `).join("") : "<p>No orders found in this browser.</p>";
+}
+
+function submitProduct(event) {
+  event.preventDefault();
+
+  const cost=Number(document.getElementById("sellerCost").value);
+  const price=Number(document.getElementById("sellerPrice").value);
+
+  if(price<=cost) {
+    alert("Your proposed selling price must be higher than your product cost.");
+    return;
+  }
+
+  submissions.unshift({
+    id:Date.now(),
+    name:document.getElementById("sellerProduct").value.trim(),
+    category:document.getElementById("sellerCategory").value,
+    cost,
+    price,
+    phone:document.getElementById("sellerPhone").value.trim(),
+    description:document.getElementById("sellerDescription").value.trim(),
+    status:"Awaiting review"
+  });
+
+  save("mh_submissions",submissions);
+
+  document.getElementById("sellerMessage").textContent =
+    "Your product has been submitted for administrator review.";
+
+  event.target.reset();
+}
+
+function addAdminProduct(event) {
+  event.preventDefault();
+
+  products.push({
+    id:Date.now(),
+    name:document.getElementById("adminProductName").value.trim(),
+    category:document.getElementById("adminProductCategory").value,
+    price:Number(document.getElementById("adminProductPrice").value),
+    cost:0,
+    image:document.getElementById("adminProductImage").value.trim() ||
+      "https://placehold.co/600x400?text=Product",
+    description:document.getElementById("adminProductDescription").value.trim()
+  });
+
+  save("mh_products",products);
+  event.target.reset();
+  renderAdmin();
+  alert("Product added to the demo catalogue.");
+}
+
+function renderAdmin() {
+  const orderBox=document.getElementById("adminOrders");
+  const sellerBox=document.getElementById("sellerSubmissions");
+
+  orderBox.innerHTML=orders.length ? orders.map(order=>`
+    <div class="row">
+      <div>
+        <strong>${escapeHTML(order.reference)}</strong><br>
+        ${escapeHTML(order.name)}<br>
+        ${escapeHTML(order.phone)}<br>
+        ${money(order.total)}<br>
+        Status: ${escapeHTML(order.status)}
+      </div>
+      <div>
+        <button class="primary small"
+          onclick="updateOrder('${order.reference}','Payment confirmed')">
+          Mark Paid
+        </button>
+        <button class="secondary small"
+          onclick="updateOrder('${order.reference}','Processing')">
+          Processing
+        </button>
+        <button class="secondary small"
+          onclick="updateOrder('${order.reference}','Completed')">
+          Completed
+        </button>
+      </div>
+    </div>
+  `).join("") : "<p>No orders yet.</p>";
+
+  sellerBox.innerHTML=submissions.length ? submissions.map(item=>`
+    <div class="row">
+      <div>
+        <strong>${escapeHTML(item.name)}</strong><br>
+        ${escapeHTML(item.category)}<br>
+        Cost: ${money(item.cost)}<br>
+        Selling price: ${money(item.price)}<br>
+        Seller: ${escapeHTML(item.phone)}<br>
+        Status: ${escapeHTML(item.status)}
+      </div>
+      <div>
+        <button class="primary small"
+          onclick="approveProduct(${item.id})">Approve</button>
+        <button class="danger small"
+          onclick="rejectProduct(${item.id})">Reject</button>
+      </div>
+    </div>
+  `).join("") : "<p>No seller submissions yet.</p>";
+}
+
+function updateOrder(reference,status) {
+  const order=orders.find(item=>item.reference===reference);
+  if(!order) return;
+
+  if(status==="Payment confirmed") {
+    const confirmed=confirm(
+      "Have you independently confirmed that this payment arrived in your PalmPay account?"
+    );
+    if(!confirmed) return;
+  }
+
+  if(status==="Completed" && order.status!=="Payment confirmed" &&
+     order.status!=="Processing") {
+    alert("Confirm payment and process the order before marking it completed.");
+    return;
+  }
+
+  order.status=status;
+  save("mh_orders",orders);
+  renderAdmin();
+  renderEarnings();
+}
+
+function approveProduct(id) {
+  const item=submissions.find(product=>product.id===id);
+  if(!item) return;
+
+  products.push({
+    id:Date.now(),
+    name:item.name,
+    category:item.category,
+    price:item.price,
+    cost:item.cost,
+    description:item.description,
+    image:"https://placehold.co/600x400?text=New+Product"
+  });
+
+  item.status="Approved";
+  save("mh_products",products);
+  save("mh_submissions",submissions);
+  renderAdmin();
+}
+
+function rejectProduct(id) {
+  const item=submissions.find(product=>product.id===id);
+  if(!item) return;
+
+  item.status="Rejected";
+  save("mh_submissions",submissions);
+  renderAdmin();
+}
+
+function renderEarnings() {
+  const completed=orders.filter(order=>order.status==="Completed");
+
+  const revenue=completed.reduce((sum,order)=>sum+order.total,0);
+
+  const costs=completed.reduce((sum,order)=>
+    sum+order.items.reduce((subtotal,item)=>
+      subtotal+(Number(item.cost||0)*item.quantity),0),0);
+
+  document.getElementById("completedSales").textContent=money(revenue);
+  document.getElementById("grossProfit").textContent=money(revenue-costs);
+}
+
+updateCartCount();
+renderProducts();
+renderEarnings();
+</script>
+</body>
+</html>
+ 
